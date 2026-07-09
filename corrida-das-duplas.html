@@ -507,33 +507,25 @@ function handleFile(file){
   reader.onerror=()=>toast('Falha ao abrir o arquivo.');
   reader.readAsArrayBuffer(file);
 }
+
+
 async function carregarPlanilha() {
   try {
     const response = await fetch("Metas.xlsx?t=" + Date.now());
-
-    if (!response.ok) {
-      throw new Error("Não foi possível carregar Metas.xlsx");
-    }
-
+    if (!response.ok) throw new Error("Não foi possível carregar Metas.xlsx");
     const buffer = await response.arrayBuffer();
-    const wb = XLSX.read(buffer, { type: "array" });
-
+    const wb = XLSX.read(buffer,{type:"array"});
     const res = parseWorkbook(wb);
-
-    if (!res) {
-      toast("Não encontrei a aba META DUPLA.");
-      return;
-    }
-
-    data = res.parsed;
+    if(!res){ toast("Não encontrei a aba META DUPLA."); return; }
+    data=res.parsed;
     resetToIntro();
-
     toast(`Planilha atualizada (${data.length} dupla(s)).`);
-  } catch (err) {
+  } catch(err){
     console.error(err);
     toast("Erro ao carregar Metas.xlsx");
   }
 }
+
 
 function resetToIntro(){
   racing=false;
@@ -550,18 +542,12 @@ document.getElementById('btnStart').addEventListener('click', ()=>{
   if(document.getElementById('winner').style.display==='block'){ resetToIntro(); }
   startRace();
 });
-document.getElementById('btnUpload').addEventListener('click', ()=>document.getElementById('fileInput').click());
-document.getElementById('fileInput').addEventListener('change', e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); e.target.value=''; });
+document.getElementById('btnUpload').addEventListener('click', carregarPlanilha);
 
-// arrastar-e-soltar o arquivo em qualquer lugar
-['dragover','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();}));
-document.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; if(f && /\.xlsx?$/i.test(f.name)) handleFile(f); });
-
-// reposiciona ao redimensionar (mantém a corrida coerente)
 window.addEventListener('resize', ()=>{ if(document.getElementById('racePanel').style.display!=='none' && !racing){ positionAll(1); }});
 
-renderIntro();
-renderLegend();
+// init
+renderIntro(); renderLegend();
 carregarPlanilha();
 </script>
 </body>
