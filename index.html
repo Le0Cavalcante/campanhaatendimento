@@ -492,7 +492,7 @@ function startRace(){
 
 function finishRace(){
   racing=false;
-  const winner = data.reduce((a,b)=> b.receb>a.receb ? b : a, data[0]);
+  const winner = data.reduce((a,b)=> pctOf(b)>pctOf(a) ? b : a, data[0]);
   const wi = data.indexOf(winner);
   const wc = LANE_COLORS[wi%LANE_COLORS.length];
 
@@ -506,7 +506,7 @@ function finishRace(){
 
   // Ranking por recebimento
   const rl=document.getElementById('rankList'); rl.innerHTML="";
-  data.map((d,i)=>({d,i})).sort((a,b)=>b.d.receb-a.d.receb).forEach((o,pos)=>{
+  data.map((d,i)=>({d,i})).sort((a,b)=>pctOf(b.d)-pctOf(a.d)).forEach((o,pos)=>{
     const c=LANE_COLORS[o.i%LANE_COLORS.length];
     const row=document.createElement('div');
     row.className='rrow'+(pos===0?' first':''); row.style.setProperty('--lane',c);
