@@ -56,6 +56,7 @@
   .finish-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px}
   .fcard{position:relative; background:var(--track); border:1px solid var(--line); border-left:5px solid var(--lane); border-radius:14px; padding:16px 16px 14px; overflow:hidden}
   .fcard .dupla-tag{display:inline-flex; align-items:center; gap:8px; font-family:var(--font-display); font-size:19px; letter-spacing:.5px; text-transform:uppercase; color:var(--lane)}
+  .fcard-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:2px}
   .dot{width:11px; height:11px; border-radius:50%; background:var(--lane); box-shadow:0 0 12px var(--lane)}
   .fcard .names{font-size:13.5px; line-height:1.45; color:var(--text); margin:9px 0 14px; min-height:38px}
   .fcard .names b{font-weight:600}
@@ -63,6 +64,12 @@
   .meta-row .lbl{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted)}
   .meta-row .val{font-family:var(--font-mono); font-weight:700; font-size:18px; color:var(--text)}
   .flag-ico{font-size:15px}
+  .src-status{display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.05em; padding:7px 12px; border-radius:9px; margin:0 0 16px; border:1px solid var(--line2)}
+  .src-status::before{content:""; width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 9px currentColor; flex:none}
+  .src-loading{color:var(--muted)}
+  .src-online{color:#57E0B0}
+  .src-local{color:var(--gold)}
+  .src-error{color:#FF6B6B}
 
   /* ---------- Track / race ---------- */
   #racePanel{margin-top:20px}
@@ -73,13 +80,20 @@
   .scale .tick:first-child{transform:translateX(0)}
   .scale .tick:last-child{transform:translateX(-100%)}
 
-  :root{--namew:210px; --flagw:74px}
+  :root{--namew:150px; --flagw:74px}
   .lanes{position:relative}
   .lane{position:relative; display:grid; grid-template-columns:var(--namew) 1fr var(--flagw); align-items:center; gap:0; height:74px}
   .lane + .lane{border-top:1px solid var(--line)}
-  .lane-name{padding-right:14px}
-  .lane-name .dn{font-family:var(--font-display); font-size:17px; letter-spacing:.5px; color:var(--lane); text-transform:uppercase; line-height:1}
+  .lane-name{padding-right:12px; display:flex; flex-direction:column; gap:6px}
+  .lane-name .dn{font-family:var(--font-display); font-size:15px; letter-spacing:.5px; color:var(--lane); text-transform:uppercase; line-height:1}
   .lane-name .en{font-size:11px; color:var(--muted); line-height:1.3; margin-top:3px}
+
+  /* ---- avatares (fotos dos atendentes) ---- */
+  .avatar{position:relative; width:var(--sz,40px); height:var(--sz,40px); border-radius:50%; overflow:hidden; background:var(--surface2); border:2px solid var(--lane); box-shadow:0 2px 6px rgba(0,0,0,.35); flex:none; display:inline-block; vertical-align:middle}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block}
+  .avatar .ini{width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-family:var(--font-body); font-weight:700; font-size:calc(var(--sz,40px)*.36); color:var(--text); background:color-mix(in srgb, var(--lane) 22%, var(--surface2))}
+  .pair{display:inline-flex; align-items:center}
+  .pair .avatar + .avatar{margin-left:calc(var(--sz,40px) * -0.34)}
 
   .track{position:relative; height:100%; background:
       repeating-linear-gradient(90deg, transparent 0, transparent calc(25% - 1px), var(--line) calc(25% - 1px), var(--line) 25%);
@@ -88,8 +102,10 @@
   /* faixa central da pista */
   .track .surface{position:absolute; left:0; right:0; top:16px; bottom:16px; background:var(--track); border-radius:8px; box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
   .fill{position:absolute; left:0; top:16px; bottom:16px; width:0; background:linear-gradient(90deg, color-mix(in srgb, var(--lane) 30%, transparent), color-mix(in srgb, var(--lane) 60%, transparent)); border-radius:8px 0 0 8px; opacity:.5}
-  .runner{position:absolute; top:50%; left:0; transform:translate(-50%,-50%); width:44px; height:44px; display:flex; align-items:center; justify-content:center; z-index:3; will-change:left}
-  .runner .puck{position:absolute; inset:0; border-radius:50%; background:var(--lane); opacity:.16}
+  .runner{position:absolute; top:50%; left:0; transform:translate(-50%,-50%); height:44px; display:flex; align-items:center; justify-content:center; z-index:3; will-change:left}
+  .runner .puck{display:none}
+  .runner .pair .avatar{box-shadow:0 3px 8px rgba(0,0,0,.45)}
+  .runner.go .pair{animation:bob .32s linear infinite}
   .runner .emoji{font-size:30px; line-height:1; filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
   .runner.go .emoji{animation:bob .32s linear infinite}
   @keyframes bob{50%{transform:translateY(-3px) rotate(-4deg)}}
@@ -97,7 +113,7 @@
   .readout .pct{color:var(--lane)}
 
   .finish{position:relative; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px}
-  .finish .flag{width:22px; height:58%; background:
+  .finish .flag{width:22px; height:100%; background:
       repeating-conic-gradient(#e9eef0 0 25%, #22323b 0 50%) 0 0 / 11px 11px; opacity:.9; border-radius:2px}
   .finish .mlabel{position:absolute; bottom:2px; font-family:var(--font-mono); font-size:10px; color:var(--muted); white-space:nowrap}
   .finish .mval{position:absolute; top:2px; font-family:var(--font-mono); font-weight:700; font-size:11px; color:var(--text); white-space:nowrap}
@@ -112,6 +128,8 @@
   .win-hero{position:relative; overflow:hidden; text-align:center; padding:30px 22px 26px; border-radius:18px; border:1px solid var(--gold-deep);
     background:radial-gradient(600px 220px at 50% -20%, rgba(255,210,63,.22), transparent 70%), linear-gradient(180deg,var(--surface),var(--surface2))}
   .win-hero .crown{font-size:46px; line-height:1}
+  .win-photos{display:flex; justify-content:center; margin:6px 0 2px}
+  .win-photos .avatar{border-width:3px}
   .win-hero .win-eyebrow{font-family:var(--font-mono); letter-spacing:.28em; text-transform:uppercase; font-size:12px; color:var(--gold); margin:8px 0 4px}
   .win-hero .win-dupla{font-family:var(--font-display); font-size:clamp(30px,6vw,52px); text-transform:uppercase; letter-spacing:.5px; margin:2px 0; color:var(--text)}
   .win-hero .win-names{font-size:16px; color:var(--text); font-weight:600; margin:2px 0 14px}
@@ -120,7 +138,8 @@
   .win-hero .win-stat .v{font-family:var(--font-mono); font-weight:700; font-size:22px; color:var(--gold)}
 
   .ranking{margin-top:16px}
-  .rrow{display:grid; grid-template-columns:34px 1fr auto auto; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid var(--line)}
+  .rrow{display:grid; grid-template-columns:34px auto 1fr auto auto; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid var(--line)}
+  .rpair{display:flex}
   .rrow:last-child{border-bottom:none}
   .rpos{font-family:var(--font-display); font-size:20px; color:var(--muted); text-align:center}
   .rrow.first .rpos{color:var(--gold)}
@@ -147,12 +166,16 @@
   canvas#confetti{position:fixed; inset:0; pointer-events:none; z-index:70; display:none}
 
   @media (max-width:640px){
-    :root{--namew:120px; --flagw:52px}
+    :root{--namew:104px; --flagw:52px}
     .lane-name .en{display:none}
+    .lane-name .dn{font-size:13px}
+    .lane-name .pair .avatar{--sz:30px !important}
+    .runner .pair .avatar{--sz:26px !important}
     .win-hero .win-stat{gap:16px; padding:10px 14px}
   }
   @media (prefers-reduced-motion:reduce){
     .runner.go .emoji{animation:none}
+    .runner.go .pair{animation:none}
     #count .num{animation:none}
   }
 </style>
@@ -176,6 +199,7 @@
   <section class="panel" id="introPanel">
     <p class="section-label">Antes da largada</p>
     <h2 class="section-h">🏁 As linhas de chegada (meta da semana)</h2>
+    <div id="srcStatus" class="src-status src-loading">Carregando planilha…</div>
     <div class="finish-grid" id="finishGrid"></div>
   </section>
 
@@ -196,6 +220,7 @@
     <div class="win-hero">
       <div class="crown">🏆</div>
       <p class="win-eyebrow">Maior recebimento da semana</p>
+      <div class="win-photos" id="winPhotos"></div>
       <div class="win-dupla" id="winDupla"></div>
       <div class="win-names" id="winNames"></div>
       <div class="win-stat">
@@ -219,10 +244,12 @@
   </section>
 
   <p class="foot-note">
-    Os dados são lidos da aba <code>META DUPLA</code> do seu Excel. Para rodar outra semana, clique em
-    <b>Atualizar planilha</b> e escolha o arquivo <code>.xlsx</code> atualizado — as metas, os recebimentos e os nomes
-    são recarregados automaticamente. A posição na pista reflete o <b>% da meta atingida</b> e o troféu vai para o
-    <b>maior recebimento da semana</b>.
+<b><h2>Como a meta foi calculada?</h2></b>
+<b><h3>Meta diária:</h3></b> A meta mensal de cada atendente ÷ 23 dias úteis do mês.</p>
+<b><h3>Meta na campanha:</h3></b> A meta diária × os 6 dias da campanha.</p>
+<b><h3>Meta da dupla:</h3></b> A soma das metas de campanha dos 2 integrantes.</p>
+<b><h2>Resultado em: 17/07/2026.</h2></b> </p>
+<b><h2>Em caso de empate, ganha a dupla que tiver o maior percentual da meta realizada.</h2></b>
   </p>
 </div>
 
@@ -231,7 +258,7 @@
 <div id="toast"></div>
 
 <script>
-/* ====== Dados embutidos (aba META DUPLA na data de criação) ======
+/* ====== Dados embutidos (abas META DUPLA + METAS INDIVIDUAIS) ======
    Servem como padrão para a página já abrir funcionando. Ao carregar
    um .xlsx novo, estes são substituídos pelos dados do arquivo.        */
 const DEFAULT_DATA = [
@@ -240,6 +267,30 @@ const DEFAULT_DATA = [
   {dupla:"Dupla 3", exec:"ELAYNE LIMA DA SILVA + MIKARLA HELLEN XAVIER SOUSA",meta:8833.33, receb:214.36},
   {dupla:"Dupla 4", exec:"DALILA MESQUITA + YASMIN OLIVEIRA VIEIRA",          meta:6500,    receb:276.84},
 ];
+
+/* Mapa NOME -> ID (usado para achar a foto). É preenchido automaticamente
+   a partir da aba METAS INDIVIDUAIS do Excel; este aqui é só o padrão. */
+const DEFAULT_NAME_ID = {
+  "LUANA DO NASCIMENTO SILVA":62, "JHESSICA ALVES COSTA":101,
+  "ISLANE SOUZA NUNES":17, "THEILO MIKAEL SOUSA BARROSO":102,
+  "ELAYNE LIMA DA SILVA":95, "MIKARLA HELLEN XAVIER SOUSA":96,
+  "DALILA MESQUITA":98, "YASMIN OLIVEIRA VIEIRA":100
+};
+
+/* ====== FOTOS ======
+   Pasta "fotos" no seu repositório GitHub. Cada foto tem o nome = id do
+   atendente (ex.: 62.jpg). Se as fotos não carregarem, troque a base pela
+   do jsDelivr (comentada abaixo) — costuma passar melhor em redes de empresa. */
+const PHOTO_BASE = "https://raw.githubusercontent.com/Le0Cavalcante/campanhaatendimento/main/fotos/";
+// const PHOTO_BASE = "https://cdn.jsdelivr.net/gh/Le0Cavalcante/campanhaatendimento@main/fotos/";
+const PHOTO_EXTS = ["jpg","jpeg","png","webp"];   // tenta nesta ordem
+
+/* Nome do arquivo Excel que fica hospedado JUNTO com esta página.
+   Para atualizar a semana, basta substituir este arquivo no servidor
+   (subir por cima, mantendo o mesmo nome). */
+const DATA_URL = "metas.xlsx";
+
+let NAME_ID = Object.assign({}, DEFAULT_NAME_ID);   // mapa vigente (atualizado pelo Excel)
 
 const LANE_COLORS = ["#C6F24E","#FF6B6B","#35D6DE","#FFA53C","#B692FF","#6BE39A","#FF8BD0","#7FB2FF","#F5D14E","#57E0B0"];
 const RUNNERS = ["🏃‍♀️","🏃‍♂️","🏃","🏃‍♀️","🏃‍♂️","🏃","🏃‍♀️","🏃‍♂️"];
@@ -255,6 +306,37 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion:reduce)').matche
 function splitNames(exec){
   return (exec||"").split(/\s*\+\s*/).map(s=>s.trim()).filter(Boolean);
 }
+const normName = s => String(s||'').trim().toUpperCase().replace(/\s+/g,' ');
+function membersOf(d){
+  // usa d.members se já veio pronto; senão deriva de exec + NAME_ID
+  if(Array.isArray(d.members) && d.members.length) return d.members;
+  return splitNames(d.exec).map(n=>({name:n, id: (NAME_ID[normName(n)] ?? null)}));
+}
+function initialsOf(name){
+  return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+/* devolve o HTML de um avatar circular; tenta as extensões e, se nada
+   carregar, mostra as iniciais do atendente */
+function avatarHTML(member, size){
+  const ini = initialsOf(member.name);
+  if(member.id==null || member.id===''){
+    return `<span class="avatar" style="--sz:${size}px" title="${member.name}"><span class="ini">${ini}</span></span>`;
+  }
+  const urls = PHOTO_EXTS.map(e=>PHOTO_BASE+member.id+'.'+e);
+  const first = urls[0];
+  const chain = urls.slice(1).join('|');
+  return `<span class="avatar" style="--sz:${size}px" title="${member.name}">`
+       + `<img src="${first}" alt="${member.name}" loading="lazy" data-chain="${chain}" onerror="photoFallback(this)">`
+       + `<span class="ini" style="display:none">${ini}</span></span>`;
+}
+function photoFallback(img){
+  const chain=(img.getAttribute('data-chain')||'').split('|').filter(Boolean);
+  if(chain.length){ img.src=chain.shift(); img.setAttribute('data-chain', chain.join('|')); }
+  else{ img.style.display='none'; const ini=img.parentNode.querySelector('.ini'); if(ini) ini.style.display='flex'; }
+}
+function pairHTML(d, size){
+  return `<span class="pair">${membersOf(d).map(m=>avatarHTML(m,size)).join('')}</span>`;
+}
 function renderIntro(){
   const grid = document.getElementById('finishGrid');
   grid.innerHTML = "";
@@ -264,7 +346,10 @@ function renderIntro(){
     const el = document.createElement('div');
     el.className='fcard'; el.style.setProperty('--lane',c);
     el.innerHTML = `
-      <span class="dupla-tag"><span class="dot"></span>${d.dupla}</span>
+      <div class="fcard-head">
+        <span class="dupla-tag"><span class="dot"></span>${d.dupla}</span>
+        ${pairHTML(d,38)}
+      </div>
       <div class="names">${names.map(n=>`<b>${n}</b>`).join('<br>')}</div>
       <div class="meta-row">
         <span class="lbl"><span class="flag-ico">🏁</span> Meta da semana</span>
@@ -308,13 +393,13 @@ function buildLanes(){
     lane.innerHTML=`
       <div class="lane-name">
         <div class="dn">${d.dupla}</div>
-        <div class="en">${splitNames(d.exec).map(n=>n.split(' ')[0]).join(' & ')}</div>
+        ${pairHTML(d,40)}
       </div>
       <div class="track">
         <div class="surface"></div>
         <div class="fill" data-i="${i}"></div>
         <div class="readout" data-i="${i}"><span class="rv">R$ 0</span> · <span class="pct">0%</span></div>
-        <div class="runner" data-i="${i}"><span class="puck"></span><span class="emoji">${RUNNERS[i%RUNNERS.length]}</span></div>
+        <div class="runner" data-i="${i}"><span class="puck"></span>${pairHTML(d,34)}</div>
       </div>
       <div class="finish">
         <div class="mval">${brl(d.meta)}</div>
@@ -395,6 +480,7 @@ function finishRace(){
 
   document.getElementById('winDupla').textContent = winner.dupla;
   document.getElementById('winDupla').style.color = wc;
+  document.getElementById('winPhotos').innerHTML = pairHTML(winner,72);
   document.getElementById('winNames').textContent = splitNames(winner.exec).join('  +  ');
   document.getElementById('winRecv').textContent = brl(winner.receb);
   document.getElementById('winMeta').textContent = brl(winner.meta);
@@ -408,6 +494,7 @@ function finishRace(){
     row.className='rrow'+(pos===0?' first':''); row.style.setProperty('--lane',c);
     row.innerHTML=`
       <div class="rpos">${pos+1}º</div>
+      <div class="rpair">${pairHTML(o.d,30)}</div>
       <div class="rname"><div class="dn">${o.d.dupla}</div><div class="en">${splitNames(o.d.exec).join(' + ')}</div></div>
       <div class="rrecv">${brl(o.d.receb)}<small>RECEBIDO</small></div>
       <div class="rpct" style="color:${c}">${(pctOf(o.d)*100).toFixed(1).replace('.',',')}%<small>DA META</small></div>`;
@@ -453,8 +540,9 @@ function toast(msg){
 /* ---------- Leitura do Excel (.xlsx) ---------- */
 function normKey(s){return String(s||'').trim().toLowerCase().replace(/\s+/g,' ').replace(/[.%]/g,'').trim();}
 function pickCol(keys, wanted){
-  // wanted: lista de nomes normalizados aceitáveis
-  for(const k of keys){ const nk=normKey(k); if(wanted.some(w=>nk===w || nk.includes(w))) return k; }
+  // 1º tenta correspondência exata; 2º tenta "contém"
+  for(const k of keys){ if(wanted.includes(normKey(k))) return k; }
+  for(const k of keys){ const nk=normKey(k); if(wanted.some(w=>nk.includes(w))) return k; }
   return null;
 }
 function toNumber(v){
@@ -465,9 +553,36 @@ function toNumber(v){
   if(s.indexOf(',')>-1){ s=s.replace(/\./g,'').replace(',', '.'); }
   const n=parseFloat(s); return isNaN(n)?0:n;
 }
+function buildNameIdMap(wb){
+  // procura abas com colunas NOME + EXECUTIVO_ID (ex.: METAS INDIVIDUAIS).
+  // Usa correspondência EXATA para não confundir com outras abas.
+  const NOME_COLS = ['nome','nome executivo','nome do executivo','atendente'];
+  const ID_COLS   = ['executivo_id','executivo id','id'];
+  const exact = (keys, wanted) => keys.find(k => wanted.includes(normKey(k))) || null;
+  const map = {};
+  for(const name of wb.SheetNames){
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {defval:null});
+    if(!rows.length) continue;
+    const keys = Object.keys(rows[0]);
+    const cNome = exact(keys, NOME_COLS);
+    const cId   = exact(keys, ID_COLS);
+    if(cNome && cId && cNome!==cId){
+      rows.forEach(r=>{
+        const nm=r[cNome], id=r[cId];
+        if(nm!=null && String(nm).trim()!=='' && id!=null && String(id).trim()!==''){
+          map[normName(nm)] = String(id).trim();
+        }
+      });
+    }
+  }
+  return map;
+}
 function parseWorkbook(wb){
+  // atualiza o mapa NOME -> ID a partir do próprio arquivo (se houver)
+  const idMap = buildNameIdMap(wb);
+  if(Object.keys(idMap).length) NAME_ID = Object.assign({}, DEFAULT_NAME_ID, idMap);
+
   // acha a aba META DUPLA (ou uma aba que tenha as colunas certas)
-  let sheet=null;
   const want = wb.SheetNames.find(n=>normKey(n)==='meta dupla' || normKey(n).includes('meta dupla'));
   const order = want ? [want, ...wb.SheetNames] : wb.SheetNames;
   for(const name of order){
@@ -481,12 +596,12 @@ function parseWorkbook(wb){
     if(cDup && cMet && cRec){
       const parsed = rows
         .filter(r=>r[cDup]!=null && String(r[cDup]).trim()!=='')
-        .map(r=>({
-          dupla:String(r[cDup]).trim(),
-          exec: cExe? String(r[cExe]||'').trim() : '',
-          meta: toNumber(r[cMet]),
-          receb: toNumber(r[cRec])
-        }));
+        .map(r=>{
+          const exec = cExe? String(r[cExe]||'').trim() : '';
+          const members = exec.split(/\s*\+\s*/).map(s=>s.trim()).filter(Boolean)
+                              .map(n=>({name:n, id:(NAME_ID[normName(n)] ?? null)}));
+          return { dupla:String(r[cDup]).trim(), exec, meta:toNumber(r[cMet]), receb:toNumber(r[cRec]), members };
+        });
       if(parsed.length) return {name, parsed};
     }
   }
@@ -501,31 +616,13 @@ function handleFile(file){
       if(!res){ toast('Não encontrei a aba META DUPLA (colunas DUPLA, META, RECEBIMENTO).'); return; }
       data=res.parsed;
       resetToIntro();
+      setStatus('local', `Planilha carregada manualmente neste dispositivo · ${data.length} dupla(s).`);
       toast(`Planilha carregada · ${data.length} dupla(s) da aba "${res.name}".`);
     }catch(err){ console.error(err); toast('Não consegui ler este arquivo. Verifique se é um .xlsx válido.'); }
   };
   reader.onerror=()=>toast('Falha ao abrir o arquivo.');
   reader.readAsArrayBuffer(file);
 }
-
-
-async function carregarPlanilha() {
-  try {
-    const response = await fetch("Metas.xlsx?t=" + Date.now());
-    if (!response.ok) throw new Error("Não foi possível carregar Metas.xlsx");
-    const buffer = await response.arrayBuffer();
-    const wb = XLSX.read(buffer,{type:"array"});
-    const res = parseWorkbook(wb);
-    if(!res){ toast("Não encontrei a aba META DUPLA."); return; }
-    data=res.parsed;
-    resetToIntro();
-    toast(`Planilha atualizada (${data.length} dupla(s)).`);
-  } catch(err){
-    console.error(err);
-    toast("Erro ao carregar Metas.xlsx");
-  }
-}
-
 
 function resetToIntro(){
   racing=false;
@@ -537,18 +634,60 @@ function resetToIntro(){
   renderIntro(); renderLegend();
 }
 
+/* ---------- Status da fonte de dados ---------- */
+function setStatus(kind, msg){
+  const el=document.getElementById('srcStatus'); if(!el) return;
+  el.className='src-status src-'+kind;
+  el.textContent=msg;
+}
+
+/* ---------- Leitura automática da planilha hospedada ---------- */
+async function loadFromUrl(){
+  // Só funciona quando a página está hospedada (http/https). Ao abrir o
+  // arquivo por duplo-clique (file://), o navegador bloqueia a leitura e
+  // caímos no exemplo embutido — nesse caso use o botão "Atualizar planilha".
+  if(location.protocol==='file:'){
+    setStatus('local','Vence a dupla que atingir 100% da somatória da meta diária no período de 09/07 a 16/07. Somando os acordos liquidados de cada dia da dupla.');
+    return;
+  }
+  if(typeof XLSX==='undefined'){
+    setStatus('error','Sem conexão para a biblioteca de leitura. Mostrando dados de exemplo.');
+    return;
+  }
+  try{
+    const resp = await fetch(DATA_URL + '?v=' + Date.now(), {cache:'no-store'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const buf = await resp.arrayBuffer();
+    const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
+    const res = parseWorkbook(wb);
+    if(!res) throw new Error('aba META DUPLA não encontrada');
+    data = res.parsed;
+    renderIntro(); renderLegend();
+    setStatus('online', `Dados atualizados da planilha online (${DATA_URL}) · ${data.length} dupla(s).`);
+  }catch(err){
+    console.warn('loadFromUrl:', err);
+    setStatus('error', `Não achei "${DATA_URL}" no servidor — mostrando dados de exemplo. Suba o Excel com esse nome na mesma pasta.`);
+  }
+}
+
 /* ---------- Ligações ---------- */
 document.getElementById('btnStart').addEventListener('click', ()=>{
   if(document.getElementById('winner').style.display==='block'){ resetToIntro(); }
   startRace();
 });
-document.getElementById('btnUpload').addEventListener('click', carregarPlanilha);
+document.getElementById('btnUpload').addEventListener('click', ()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); e.target.value=''; });
 
+// arrastar-e-soltar o arquivo em qualquer lugar
+['dragover','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();}));
+document.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; if(f && /\.xlsx?$/i.test(f.name)) handleFile(f); });
+
+// reposiciona ao redimensionar (mantém a corrida coerente)
 window.addEventListener('resize', ()=>{ if(document.getElementById('racePanel').style.display!=='none' && !racing){ positionAll(1); }});
 
 // init
 renderIntro(); renderLegend();
-carregarPlanilha();
+loadFromUrl();
 </script>
 </body>
 </html>
