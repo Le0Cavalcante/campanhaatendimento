@@ -555,15 +555,17 @@ function parseWorkbook(wb){
     const cId=exactCol(keys,['executivo_id','executivo id','id']);
     const cNome=exactCol(keys,['nome','nome executivo','atendente']);
     const cMetaS=fuzzyCol(keys,['meta semana','meta da semana']);
+    const cRecMI=exactCol(keys,['total_honorarios','total honorarios','honorarios']);
     if(cId && cNome && cId!==cNome){
       rows.forEach(r=>{
         const id=r[cId]!=null?String(r[cId]).trim():null;
         const nm=r[cNome]!=null?normName(r[cNome]):null;
         if(!id||!nm) return;
-        const metaSem = cMetaS!=null ? toNumber(r[cMetaS]) : null;
-        const rec = {id, metaSem};
-        if(!(id in byId) || metaSem) byId[id]=rec;
-        if(!(nm in byName) || metaSem) byName[nm]=rec;
+    const metaSem = cMetaS!=null ? toNumber(r[cMetaS]) : null;
+    const receb   = cRecMI!=null ? toNumber(r[cRecMI]) : null;
+    const rec = {id, metaSem, receb};
+      if(!(id in byId)   || metaSem!=null || receb!=null) byId[id]=rec;
+      if(!(nm in byName) || metaSem!=null || receb!=null) byName[nm]=rec;
       });
     }
   }
@@ -600,7 +602,8 @@ function parseWorkbook(wb){
           const info = byName[key] || null;
           const id = info ? info.id : null;
           const metaSem = info ? info.metaSem : null;
-          const receb = (id!=null && recById[id]!=null) ? recById[id] : 0;
+          const receb = (info && info.receb!=null) ? info.receb
+            : (id!=null && recById[id]!=null) ? recById[id] : 0;
           fl.push({name:nm, id, dupla, di, meta:metaSem||0, receb});
         });
       });
