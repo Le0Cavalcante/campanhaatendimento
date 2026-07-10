@@ -555,28 +555,23 @@ function parseWorkbook(wb){
     const cId=exactCol(keys,['executivo_id','executivo id','id']);
     const cNome=exactCol(keys,['nome','nome executivo','atendente']);
     const cMetaS=fuzzyCol(keys,['meta semana','meta da semana']);
+    const cHon=fuzzyCol(keys,['total_honorarios','total honorarios','honorarios','recebimento']);
     if(cId && cNome && cId!==cNome){
       rows.forEach(r=>{
         const id=r[cId]!=null?String(r[cId]).trim():null;
         const nm=r[cNome]!=null?normName(r[cNome]):null;
         if(!id||!nm) return;
-        const metaSem = cMetaS!=null ? toNumber(r[cMetaS]) : null;
-        const rec = {id, metaSem};
+        const metaSem = cMetaS != null ? toNumber(r[cMetaS]) : null;
+        const receb = cHon != null ? toNumber(r[cHon]) : 0;
+        
+        const rec = {
+            id,
+            metaSem,
+            receb
+        };
         if(!(id in byId) || metaSem) byId[id]=rec;
         if(!(nm in byName) || metaSem) byName[nm]=rec;
       });
-    }
-  }
-  // 2) recebimento por id (aba RECEBIMENTO: executivo_id + total_honorarios)
-  const recById={};
-  for(const name of wb.SheetNames){
-    const rows=sheetRows(wb,name); if(!rows.length) continue;
-    const keys=Object.keys(rows[0]);
-    const cId=exactCol(keys,['executivo_id','executivo id','id']);
-    const cHon=fuzzyCol(keys,['total_honorarios','total honorarios','honorarios','recebimento']);
-    const hasName=exactCol(keys,['nome','nome executivo','atendente']);
-    if(cId && cHon && !hasName){   // evita reusar a aba de metas
-      rows.forEach(r=>{ const id=r[cId]!=null?String(r[cId]).trim():null; if(!id)return; recById[id]=(recById[id]||0)+toNumber(r[cHon]); });
     }
   }
   // 3) duplas (aba META DUPLA)
@@ -597,14 +592,21 @@ function parseWorkbook(wb){
         dl.push({dupla, meta:toNumber(r[cMet]), receb:cRec?toNumber(r[cRec]):0});
         String(r[cExe]||'').split(/\s*\+\s*/).map(s=>s.trim()).filter(Boolean).forEach(nm=>{
           const key=normName(nm);
-          const info = byName[key] || null;
-          const id = info ? info.id : null;
-          const metaSem = info ? info.metaSem : null;
-          const receb = (id!=null && recById[id]!=null) ? recById[id] : 0;
-          fl.push({name:nm, id, dupla, di, meta:metaSem||0, receb});
-        });
+      const info = byName[key] || null;
+      
+      const id = info ? info.id : null;
+      const metaSem = info ? info.metaSem : 0;
+      const receb = info ? info.receb : 0;
+      
+      fl.push({
+          name: nm,
+          id,
+          dupla,
+          di,
+          meta: metaSem,
+          receb
       });
-      if(fl.length){ duplasOut=dl; fightersOut=fl; break; }
+    if(fl.length){ duplasOut=dl; fightersOut=fl; break; }
     }
   }
   if(!fightersOut) return null;
