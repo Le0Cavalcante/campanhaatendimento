@@ -663,7 +663,7 @@ async function loadFromUrl(){
     if(!res) throw new Error('aba META DUPLA não encontrada');
     data = res.parsed;
     renderIntro(); renderLegend();
-    setStatus('online', `Dados atualizados da planilha online (${DATA_URL}) · ${data.length} dupla(s).`);
+    setStatus('online', 'Vence a dupla que atingir 100% da somatória da meta diária no período de 09/07 a 16/07. Somando os acordos liquidados de cada dia da dupla.');
   }catch(err){
     console.warn('loadFromUrl:', err);
     setStatus('error', `Não achei "${DATA_URL}" no servidor — mostrando dados de exemplo. Suba o Excel com esse nome na mesma pasta.`);
