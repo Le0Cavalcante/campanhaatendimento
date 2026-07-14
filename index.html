@@ -464,7 +464,7 @@ function startRace(){
 
   const run = ()=>{
     document.querySelectorAll('.runner').forEach(r=>r.classList.add('go'));
-    const dur = reduceMotion ? 500 : 4200;
+    const dur = reduceMotion ? 500 : 15000;
     const t0 = performance.now();
     const step = now=>{
       const raw = Math.min(1,(now-t0)/dur);
